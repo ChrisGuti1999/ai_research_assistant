@@ -5,15 +5,23 @@ A Python-based research assistant that answers natural-language questions over f
 > **Project status:** Functional local learning prototype, not a production deployment. The included companies and financial data are **fictional**.
 
 
+
 ## Application Demo
 
-### RAG Mode
-
-![AI Research Assistant - RAG Mode](images/rag_demo.png)
-
-### Agent Mode
-
-![AI Research Assistant - Agent Mode](images/agent_demo.png)
+<table>
+  <tr>
+    <th align="center">RAG Mode</th>
+    <th align="center">Agent Mode</th>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="images/rag_demo.png" alt="RAG Mode" width="100%">
+    </td>
+    <td width="50%">
+      <img src="images/agent_demo.png" alt="Agent Mode" width="100%">
+    </td>
+  </tr>
+</table>
 
 ## What it does
 
