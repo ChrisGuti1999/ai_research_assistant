@@ -1,5 +1,9 @@
 # AI Research Assistant — RAG, LLM Tool Calling & Evaluation
 
+A Python-based research assistant that answers natural-language questions over financial research documents. It combines **Retrieval-Augmented Generation (RAG)**, **OpenAI embeddings**, **ChromaDB vector search**, and an optional **LLM tool-calling workflow**, with a lightweight **Streamlit** interface and evaluation script.
+
+> **Project status:** Functional local learning prototype, not a production deployment. The included companies and financial data are **fictional**.
+
 
 ## Application Demo
 
@@ -10,11 +14,6 @@
 ### Agent Mode
 
 ![AI Research Assistant - Agent Mode](images/agent_demo.png)
-
-
-A Python-based research assistant that answers natural-language questions over financial research documents. It combines **Retrieval-Augmented Generation (RAG)**, **OpenAI embeddings**, **ChromaDB vector search**, and an optional **LLM tool-calling workflow**, with a lightweight **Streamlit** interface and evaluation script.
-
-> **Project status:** Functional local learning prototype, not a production deployment. The included companies and financial data are **fictional**.
 
 ## What it does
 
