@@ -1,70 +1,169 @@
-# AI Research Assistant — beginner-friendly RAG / agent / evaluation starter
+# AI Research Assistant — RAG, LLM Tool Calling & Evaluation
 
-A **learning prototype**, not a production system. All bundled companies and financial statements are **fictional examples**. The code is designed to be readable, so you can explain every component in interviews.
 
-## The learning sequence
+## Application Demo
 
-1. **LLM API**: Python calls a pre-trained OpenAI model. No model training is required.
-2. **RAG**: Extract PDF/text, split into overlapping chunks, create embeddings, persist them in a Chroma vector database, retrieve top-3 similar chunks, ask an LLM to answer using only those chunks.
-3. **Agent**: The model requests a `search_reports` function with a chosen query; Python executes it and returns evidence to the model. This is *bounded tool-calling*, not a complex autonomous agent.
-4. **Evaluation + monitoring**: Run test questions, record retrieval Hit@3, model abstentions, latency, and token usage. Manually review factual accuracy/citation correctness.
-5. **Deployment**: Only after you are comfortable: push code to GitHub (never include `.env`, `.chroma`, or confidential files) and deploy via Streamlit Community Cloud with the API key stored as a secret. A public demo needs usage limits and safety controls.
+### RAG Mode
 
-## Setup (Mac Terminal)
+![AI Research Assistant - RAG Mode](images/rag_demo.png)
 
-Use Python **3.11 or newer**.
+### Agent Mode
+
+![AI Research Assistant - Agent Mode](images/agent_demo.png)
+
+
+A Python-based research assistant that answers natural-language questions over financial research documents. It combines **Retrieval-Augmented Generation (RAG)**, **OpenAI embeddings**, **ChromaDB vector search**, and an optional **LLM tool-calling workflow**, with a lightweight **Streamlit** interface and evaluation script.
+
+> **Project status:** Functional local learning prototype, not a production deployment. The included companies and financial data are **fictional**.
+
+## What it does
+
+- **Indexes documents:** Extracts text from `.pdf` and `.txt` files, splits it into overlapping chunks, generates embeddings, and stores the text, vectors, and source metadata in a persistent local ChromaDB collection.
+- **Answers with RAG:** Embeds the user's question, retrieves the top three matching chunks, and supplies them as context to an LLM. The assistant is instructed to answer from the evidence and cite its sources.
+- **Supports a bounded agent mode:** An LLM formulates a query using OpenAI function calling; Python runs the `search_reports` tool and passes its results back to the LLM for a final response.
+- **Records basic performance:** Reports response latency, generative-model token usage, and retrieved passages; an evaluation script measures source-level Hit@3 and heuristic abstention behaviour.
+
+## Architecture
+
+```text
+                  ┌────────────────────────┐
+                  │ Streamlit UI (app.py)   │
+                  │ Index / Ask / View      │
+                  └────────────┬───────────┘
+                               │
+              ┌────────────────┴────────────────┐
+              │                                 │
+       Document ingestion                  Question answering
+              │                                 │
+       PDF / TXT files                  ┌────────┴─────────┐
+              │                        │                  │
+       Text extraction               RAG mode          Agent mode
+              │                        │                  │
+       Overlapping chunks       Use user question    LLM generates
+              │                 as search query      tool query
+       OpenAI embeddings               │                  │
+              │                        └────────┬─────────┘
+              ▼                                 │
+       Local ChromaDB ◄───────────── Embed query + vector search
+       (text + vectors                       │
+        + metadata)                     Retrieved passages
+                                               │
+                                          OpenAI LLM
+                                               │
+                                     Answer + source references
+```
+
+Both modes use the **same indexed documents and retrieval function**. The key difference is that basic RAG searches with the original question, whereas agent mode uses a query selected by the LLM through a structured tool call. In this prototype, the agent is **required to call one available search tool**; it is not an autonomous multi-tool system.
+
+## Tech stack
+
+| Component | Technology |
+| --- | --- |
+| Language | Python |
+| LLM generation and tool calling | OpenAI Responses API |
+| Embeddings | `text-embedding-3-small` |
+| Vector database | ChromaDB (`PersistentClient`) |
+| Document extraction | pypdf and Python text processing |
+| User interface | Streamlit |
+| Evaluation | Python, JSON test cases, CSV reporting |
+
+The application uses the OpenAI API directly; **LangChain is not required**.
+
+## Getting started
+
+**Requirements:** Python **3.12 recommended** (the version used for local development), an OpenAI API key, and API billing/credits enabled for your project.
 
 ```bash
-cd ai_research_assistant_starter
-python3 -m venv .venv
+# Clone the repository
+git clone https://github.com/ChrisGuti1999/ai_research_assistant.git
+cd ai_research_assistant
+
+# Create and activate a virtual environment (macOS / Linux)
+python3.12 -m venv .venv
 source .venv/bin/activate
+
+# Install dependencies
 python -m pip install -r requirements.txt
+
+# Create a private local configuration file
 cp .env.example .env
 ```
 
-Go to https://platform.openai.com/api-keys , create an API key for your own project, and edit the `.env` file. **Never commit or share the API key.** An OpenAI API account is billed separately from your ChatGPT subscription; set a spending limit in the developer platform. See https://developers.openai.com/api/docs/quickstart . The default model is `gpt-5.6-terra` as of October 2026, but you may choose another supported model.
+Edit `.env` and replace the placeholder key:
 
-Run the app:
+```dotenv
+OPENAI_API_KEY=your_api_key_here
+OPENAI_MODEL=gpt-4o-mini
+```
+
+Never commit `.env` or share your API key. The repository's `.gitignore` excludes `.env`, virtual environments, local ChromaDB data and generated usage logs. **Indexing and asking questions make billable OpenAI API requests.**
+
+Launch the interface:
 
 ```bash
 python -m streamlit run app.py
 ```
 
-Click **Index documents** in the app sidebar. Indexing calls the OpenAI embeddings API, so it needs your key and may incur a small charge. Then ask:
+Open `http://localhost:8501`, click **Index documents**, choose **RAG** or **Agent** mode, and ask a question about the indexed material. The three included `.txt` documents are fictional examples, so you can try the application without downloading external reports.
 
-- What drove Aurelia Analytics revenue growth in 2026?
+### Example questions
+
+- What drove Aurelia Analytics' revenue growth in 2026?
 - What was Harbor Payments' processed payment volume in 2026?
-- Who was Aurelia Analytics' CEO in June 2026? (should acknowledge missing evidence)
+- Who was Aurelia Analytics' chief executive in June 2026? *(The documents do not supply this information; the assistant should abstain.)*
 
-Explore the retrieved passages under the answer: these are the **RAG context**. Try **Agent (Phase 2)** to see the LLM choose and call the `search_reports` tool. Use `python evaluate.py` for a tiny evaluation run (once the documents are indexed). The evaluation is just a starting point; four questions cannot establish reliability.
+## RAG versus agent: initial observations
 
-## Read the code in this order
+The first local test of the same question in each mode produced the following results:
 
-- `app.py` — user interface; what the application does.
-- `rag.py`: `chunk_text()` → `load_chunks()` → `ingest()` → `search_reports()` → `answer_question()`.
-- `agent.py` — model function calling and tool execution.
-- `evaluate.py` — small evaluation harness.
+| Metric | RAG | Agent |
+| --- | ---: | ---: |
+| Latency | 4.37 s | 5.01 s |
+| LLM input tokens | 538 | 727 |
+| LLM output tokens | 61 | 159 |
+| Retrieved chunks | 3 | 3 |
 
-## Use real public research material
+These are **single-run observations, not a benchmark**. Token counts cover generative LLM requests and **exclude embedding requests**; token counts are not equivalent to total monetary cost. Since the index contained only three chunks and retrieval requested the top three, both modes necessarily retrieved the entire corpus. No retrieval-quality advantage can be inferred from this comparison.
 
-Replace the three fictional `.txt` files in `documents/` with publicly available PDF annual reports or investor presentations, re-index, then write 10–20 test questions. Verify PDF extraction worked (scanned images may require separate text extraction). Do **not** upload PayPal/client/employer information without authorisation.
+## Evaluation
 
-## Limits / next steps
+Run the included evaluation script **after indexing the documents**:
 
-This is a real RAG prototype, not a validated production application. In particular, text chunking is character-based rather than token-aware, answer grounding is encouraged by instructions rather than guaranteed, retrieval uses no score threshold or reranking, and the example evaluation is small. The agent makes one tool-call round and only has one tool. Improve it by adding query filters, metadata constraints, stronger citations, prompt-injection defences, human feedback, tests, retries, cost controls and meaningful deployment monitoring.
+```bash
+python evaluate.py
+```
 
-## CV examples (only after you've actually completed the steps)
+It reads `eval_cases.json`, executes the basic RAG workflow, and saves `evaluation_results.csv`. The initial sample run returned **3/3 source-level Hit@3** on applicable questions and **1/1 expected abstention detected**.
 
-After RAG: "Built a Python-based RAG prototype to answer natural-language questions over research documents, using OpenAI embeddings, Chroma vector search and source-grounded LLM responses."
+**Important limitations:** With only three indexed chunks and `top_k=3`, the retrieval result is not a meaningful test of ranking quality. The abstention check looks for particular phrases rather than verifying semantic correctness. The script does **not** yet assess answer faithfulness, citation accuracy, repeated-run variability, or agent-mode performance. Answers require manual review.
 
-After adding tool calling and evaluation: "Extended a research assistant with LLM function calling and an evaluation harness for retrieval Hit@3, abstention, response latency and token usage."
+A small chunking test is available at `tests/test_chunking.py`; to run it, install `pytest` in your environment and execute `python -m pytest`.
 
-**Never describe a personal demo as a production deployment or paid work.**
+## Repository structure
 
-## Official technical references
+```text
+app.py                 Streamlit interface
+rag.py                 Ingestion, embeddings, retrieval, generation, usage logging
+agent.py               Bounded LLM function-calling workflow
+evaluate.py            Basic RAG evaluation runner
+eval_cases.json        Four sample evaluation questions
+documents/             Fictional sample financial summaries
+tests/test_chunking.py Chunking unit tests
+requirements.txt       Python dependencies
+.env.example           Safe configuration template
+```
 
-- Responses API: https://developers.openai.com/api/docs/guides/text
-- Embeddings: https://developers.openai.com/api/docs/guides/embeddings
-- Function calling: https://developers.openai.com/api/docs/guides/function-calling
-- Chroma: https://docs.trychroma.com/docs/collections/manage-collections
-- Streamlit: https://docs.streamlit.io/develop/concepts/architecture/run-your-app
+## Limitations and next steps
+
+This project is designed for learning and local experimentation. It currently uses character-based chunking, has no retrieval relevance threshold or reranker, and relies on prompting rather than independent verification of generated claims. Re-indexing deletes and rebuilds the collection, so an interrupted indexing run can leave a partially populated index. Logs record user questions locally; do not use confidential or proprietary data without appropriate safeguards.
+
+Planned improvements include:
+
+- Expand the corpus with **publicly redistributable** research material and create a larger, labelled evaluation set.
+- Compare RAG and Agent mode on retrieval quality, grounded answer correctness, abstention, latency and cost.
+- Add structured output validation, robust API error handling, retries and human-review paths.
+- Add automated tests, containerisation, and appropriate monitoring before exploring a controlled deployment.
+
+## Notes
+
+This is an **independent, AI-assisted learning project**. It does not represent work completed for an employer or client, and it has not been validated for production or high-stakes financial decision-making.
