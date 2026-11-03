@@ -1,0 +1,27 @@
+# API keys and secrets
+.env
+.env.*
+!.env.example
+
+# Local development settings
+.vscode/
+
+# Personal command notes
+commands_run.txt
+
+# Python virtual environments
+.venv/
+.venv-*/
+__pycache__/
+*.pyc
+
+# Local ChromaDB database
+.chroma/
+
+# Generated logs and evaluation results
+usage_log.jsonl
+evaluation_results.csv
+*.log
+
+# macOS files
+.DS_Store

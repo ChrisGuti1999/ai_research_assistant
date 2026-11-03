@@ -1,0 +1,8 @@
+DEMONSTRATION DATA - FICTIONAL COMPANY, NOT AN ACTUAL FINANCIAL REPORT
+Aurelia Analytics - 2026 annual business summary
+Aurelia Analytics is a fictional cloud analytics business.
+Total revenue for calendar year 2026 was $3.6 billion, compared with $3.0 billion in 2025.
+The principal revenue growth drivers were enterprise contract expansion of 25% and demand for cloud data services, which grew 30% year over year.
+The APAC region contributed incremental revenue, while customer retention remained stable at 92%.
+Operating margin increased from 18% to 20% due to improved utilisation of cloud infrastructure.
+All amounts are made-up examples solely for demonstrating document retrieval.

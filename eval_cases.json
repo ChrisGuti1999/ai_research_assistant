@@ -1,0 +1,6 @@
+[
+  {"question": "What drove Aurelia Analytics revenue growth in 2026?", "expected_source": "aurelia_2026.txt", "should_abstain": false},
+  {"question": "What was Harbor Payments' processed payment volume in 2026?", "expected_source": "harbor_payments_2026.txt", "should_abstain": false},
+  {"question": "What was Aurelia Analytics' revenue in 2025?", "expected_source": "aurelia_2025.txt", "should_abstain": false},
+  {"question": "Who was the chief executive of Aurelia Analytics in June 2026?", "expected_source": null, "should_abstain": true}
+]

@@ -1,0 +1,7 @@
+DEMONSTRATION DATA - FICTIONAL COMPANY, NOT AN ACTUAL FINANCIAL REPORT
+Aurelia Analytics - 2025 annual business summary
+Aurelia Analytics is a fictional provider of cloud analytics software.
+Total revenue for calendar year 2025 was $3.0 billion, compared with $2.4 billion in 2024.
+Management attributed the increase principally to a 24% expansion of recurring enterprise subscriptions and stronger demand from European customers.
+The company reported an operating margin of 18% for the year and invested in data security and cloud infrastructure.
+All amounts are made-up examples solely for demonstrating document retrieval.

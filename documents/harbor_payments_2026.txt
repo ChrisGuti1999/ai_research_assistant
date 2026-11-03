@@ -1,0 +1,8 @@
+DEMONSTRATION DATA - FICTIONAL COMPANY, NOT AN ACTUAL FINANCIAL REPORT
+Harbor Payments - 2026 business summary
+Harbor Payments is a fictional global payment service provider.
+Total processed payment volume in calendar year 2026 was $240 billion, compared to $200 billion in calendar year 2025.
+The main contributors to payment volume growth were expansion among enterprise merchants and increased activity in international e-commerce.
+The merchant-level authorisation rate increased from 87% to 89% after improvements in issuer routing and authentication flows.
+Management highlighted chargeback controls and fraud monitoring as priorities.
+All amounts are made-up examples solely for demonstrating document retrieval.
