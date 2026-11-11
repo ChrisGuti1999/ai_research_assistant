@@ -109,12 +109,13 @@ def search_reports(question: str, top_k: int = 3) -> list[dict]:
         include=['documents', 'metadatas', 'distances']
     )
     return [{
+        'chunk_id': chunk_id,
         'text': text,
         'source': meta['source'],
         'page': meta['page'],
         'distance': round(distance, 4),
-    } for text, meta, distance in zip(
-        results['documents'][0], results['metadatas'][0], results['distances'][0]
+    } for chunk_id, text, meta, distance in zip(
+        results["ids"][0], results['documents'][0], results['metadatas'][0], results['distances'][0]
     )]
 
 

@@ -4,6 +4,10 @@
   "question": "What was Plastic Energy's revenue in 2023?",
   "expected_answer": "£3.977m",
   "expected_pages": [4, 13],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p13:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p4:c0"
+  ],
   "should_abstain": false
 },
 
@@ -11,7 +15,12 @@
   "id": "Q2",
   "question": "What was its loss before tax in 2023?",
   "expected_answer": "£26.765m loss",
-  "expected_pages": [4, 13],
+  "expected_pages": [4, 13, 25],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p4:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p13:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p25:c0"
+  ],
   "should_abstain": false
 },
 
@@ -20,6 +29,9 @@
   "question": "Why did the company operate at a loss in 2023?",
   "expected_answer": "Heavy investment in technology development and organisational capabilities",
   "expected_pages": [4],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p4:c0"
+  ],
   "should_abstain": false
 },
 
@@ -28,6 +40,10 @@
   "question": "How did its cash balance change between 2022 and 2023?",
   "expected_answer": "Increased from £0.919m to £3.288m, a rise of £2.369m",
   "expected_pages": [4, 14],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p4:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p14:c0"
+  ],
   "should_abstain": false
 },
 
@@ -36,6 +52,8 @@
   "question": "How much revenue did Plastic Energy generate in 2025?",
   "expected_answer": null,
   "expected_pages": [],
+  "relevant_chunk_ids": [
+  ],
   "should_abstain": true
 }
 ]

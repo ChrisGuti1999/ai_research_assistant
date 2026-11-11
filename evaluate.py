@@ -32,6 +32,31 @@ def main():
         # 2. Run the RAG application
         result = answer_question(case["question"])
 
+        retrieved_chunks_ranked = [
+        {
+            "citation": f"[{i}]",
+            "chunk_id": source["chunk_id"],
+            "page": source["page"],
+        }
+        for i, source in enumerate(result["sources"], start=1)
+        ]  
+
+
+        # Compare retrieved chunks against ground-truth chunks
+        expected_chunks = set(case.get("relevant_chunk_ids", []))
+
+        retrieved_chunks = {
+            source["chunk_id"]
+            for source in result["sources"]
+        }
+
+        chunk_hit_at_3 = (
+            bool(expected_chunks & retrieved_chunks)
+            if expected_chunks else None
+        )
+
+
+
         # 3. Compare retrieved pages with expected pages
         expected_pages = set(case["expected_pages"])
         retrieved_pages = {
@@ -57,6 +82,8 @@ def main():
             "actual_answer": result["answer"],
             "expected_pages": sorted(expected_pages),
             "retrieved_pages": sorted(retrieved_pages),
+            "retrieved_chunks_ranked": json.dumps(retrieved_chunks_ranked),
+            "chunk_hit_at_3": (chunk_hit_at_3 if chunk_hit_at_3 is not None else ""),
             "page_hit_at_3": page_hit if page_hit is not None else "",
             "should_abstain": case["should_abstain"],
             "abstained": abstained,
@@ -90,6 +117,16 @@ def main():
     if scorable:
         hits = sum(row["page_hit_at_3"] for row in scorable)
         print(f"\nPage Hit@3: {hits}/{len(scorable)}")
+
+
+    chunk_scorable = [
+        row for row in rows
+        if isinstance(row["chunk_hit_at_3"], bool)
+    ]
+
+    if chunk_scorable:
+        hits = sum(row["chunk_hit_at_3"] for row in chunk_scorable)
+        print(f"Chunk Hit@3: {hits}/{len(chunk_scorable)}")
 
     correct_abstentions = sum(
         row["abstention_correct"] for row in rows
