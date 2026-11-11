@@ -1,0 +1,41 @@
+[
+{
+  "id": "Q1",
+  "question": "What was Plastic Energy's revenue in 2023?",
+  "expected_answer": "£3.977m",
+  "expected_pages": [4, 13],
+  "should_abstain": false
+},
+
+{
+  "id": "Q2",
+  "question": "What was its loss before tax in 2023?",
+  "expected_answer": "£26.765m loss",
+  "expected_pages": [4, 13],
+  "should_abstain": false
+},
+
+{
+  "id": "Q3",
+  "question": "Why did the company operate at a loss in 2023?",
+  "expected_answer": "Heavy investment in technology development and organisational capabilities",
+  "expected_pages": [4],
+  "should_abstain": false
+},
+
+{
+  "id": "Q4",
+  "question": "How did its cash balance change between 2022 and 2023?",
+  "expected_answer": "Increased from £0.919m to £3.288m, a rise of £2.369m",
+  "expected_pages": [4, 14],
+  "should_abstain": false
+},
+
+{
+  "id": "Q5",
+  "question": "How much revenue did Plastic Energy generate in 2025?",
+  "expected_answer": null,
+  "expected_pages": [],
+  "should_abstain": true
+}
+]

@@ -1,40 +1,103 @@
-"""Simple Phase 3 evaluation: retrieval Hit@3, abstention and latency."""
-from pathlib import Path
+
+"""V2 RAG evaluation: evidence retrieval, abstention and performance."""
+
 import csv
 import json
 
 from rag import ROOT, answer_question
 
 
+def detect_abstention(answer: str) -> bool:
+    """Basic heuristic: detect when the model declines to answer."""
+    phrases = [
+        "i don't know",
+        "insufficient",
+        "not disclosed",
+        "not available",
+        "cannot determine",
+        "not provided",
+    ]
+    return any(phrase in answer.lower() for phrase in phrases)
+
+
 def main():
-    cases = json.loads((ROOT / 'eval_cases.json').read_text(encoding='utf-8'))
+    # 1. Load the verified ground-truth questions
+    cases = json.loads(
+        (ROOT / "eval_cases_v2.json").read_text(encoding="utf-8")
+    )
+
     rows = []
+
     for case in cases:
-        result = answer_question(case['question'])
-        retrieved = {s['source'] for s in result['sources']}
-        hit = case['expected_source'] in retrieved if case.get('expected_source') else None
-        abstained = "i don't know" in result['answer'].lower() or 'insufficient' in result['answer'].lower()
-        row = {
-            'question': case['question'],
-            'expected_source': case.get('expected_source') or '',
-            'hit_at_3': hit if hit is not None else '',
-            'expected_abstention': case.get('should_abstain', False),
-            'abstained': abstained,
-            'latency_seconds': result['latency_seconds'],
-            'answer': result['answer'],
+        # 2. Run the RAG application
+        result = answer_question(case["question"])
+
+        # 3. Compare retrieved pages with expected pages
+        expected_pages = set(case["expected_pages"])
+        retrieved_pages = {
+            int(source["page"]) for source in result["sources"]
         }
+
+        page_hit = (
+            bool(expected_pages & retrieved_pages)
+            if expected_pages else None
+        )
+
+        # 4. Evaluate abstention behaviour
+        abstained = detect_abstention(result["answer"])
+        abstention_correct = (
+            abstained == case["should_abstain"]
+        )
+
+        # 5. Store results for review
+        row = {
+            "id": case["id"],
+            "question": case["question"],
+            "expected_answer": case["expected_answer"] or "",
+            "actual_answer": result["answer"],
+            "expected_pages": sorted(expected_pages),
+            "retrieved_pages": sorted(retrieved_pages),
+            "page_hit_at_3": page_hit if page_hit is not None else "",
+            "should_abstain": case["should_abstain"],
+            "abstained": abstained,
+            "abstention_correct": abstention_correct,
+            "answer_correct_manual": "",
+            "latency_seconds": result["latency_seconds"],
+            "input_tokens": result["input_tokens"],
+            "output_tokens": result["output_tokens"],
+        }
+
         rows.append(row)
-        print(json.dumps({k: v for k, v in row.items() if k != 'answer'}))
-    output = ROOT / 'evaluation_results.csv'
-    with output.open('w', newline='', encoding='utf-8') as f:
+        print(
+            f"{case['id']}: Page Hit@3={row['page_hit_at_3']}, "
+            f"Abstention correct={abstention_correct}"
+        )
+
+    # 6. Export the evaluation results
+    output = ROOT / "evaluation_results_v2.csv"
+
+    with output.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
-    known = [r for r in rows if isinstance(r['hit_at_3'], bool)]
-    if known:
-        print(f"Retrieval Hit@3: {sum(r['hit_at_3'] for r in known)}/{len(known)}")
-    print(f'Saved {output.name} (review answer correctness manually)')
+
+    # 7. Print summary statistics
+    scorable = [
+        row for row in rows
+        if isinstance(row["page_hit_at_3"], bool)
+    ]
+
+    if scorable:
+        hits = sum(row["page_hit_at_3"] for row in scorable)
+        print(f"\nPage Hit@3: {hits}/{len(scorable)}")
+
+    correct_abstentions = sum(
+        row["abstention_correct"] for row in rows
+    )
+    print(f"Abstention behaviour: {correct_abstentions}/{len(rows)}")
+    print(f"Saved: {output.name}")
+    print("Review answer correctness manually in the CSV.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
