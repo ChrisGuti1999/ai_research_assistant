@@ -29,7 +29,7 @@ A Python-based research assistant that answers natural-language questions over f
 - **Indexes documents:** Extracts text from `.pdf` and `.txt` files, splits it into overlapping chunks, generates embeddings, and stores the text, vectors, and source metadata in a persistent local ChromaDB collection.
 - **Answers with RAG:** Embeds the user's question, retrieves the configurable retrieval depth (top_k = 3 or 5) matching chunks with optional source filtering, and supplies them as context to an LLM. The assistant is instructed to answer from the evidence and cite its sources.
 - **Supports a bounded agent mode:** An LLM formulates a query using OpenAI function calling; Python runs the `search_reports` tool and passes its results back to the LLM for a final response.
-- **Records basic performance:** Reports response latency, generative-model token usage, and retrieved passages; an evaluation script measures page-level and chunk-level Hit@K, Precision@K, MRR, abstention behaviour, latency and generative token usage.
+- **Evaluates retrieval and response performance:** Reports response latency, generative-model token usage, and retrieved passages; an evaluation script measures page-level and chunk-level Hit@K, Precision@K, MRR, abstention behaviour, latency and generative token usage.
 
 ## Architecture
 
@@ -216,9 +216,10 @@ Open `http://localhost:8501`, click **Index documents**, choose **RAG** or **Age
 app.py                 Streamlit interface
 rag.py                 Ingestion, embeddings, retrieval, generation, usage logging
 agent.py               Bounded LLM function-calling workflow
-evaluate.py            Configurable RAG and Agent retrieval depth Evaluation runner
+evaluate.py            Configurable RAG/Agent benchmark runner
 eval_cases.json        Four sample evaluation questions
-eval_cases_v2.json     15 sample evaluation questions
+eval_cases_v2.json     15 labelled financial research evaluation cases
+inspect_chunks.py      Inspect indexed chunk
 documents/             Fictional sample financial summaries
 tests/test_chunking.py Chunking unit tests
 requirements.txt       Python dependencies
@@ -227,21 +228,37 @@ requirements.txt       Python dependencies
 
 ## Roadmap
 
-This project is designed for learning and local experimentation. It currently uses character-based chunking, has no retrieval relevance threshold or reranker, and relies on prompting rather than independent verification of generated claims. Re-indexing deletes and rebuilds the collection, so an interrupted indexing run can leave a partially populated index. Logs record user questions locally; do not use confidential or proprietary data without appropriate safeguards.
+The project follows an iterative development approach, progressing from a functional RAG prototype to evaluated retrieval systems, agentic workflows and production engineering practices.
 
-Planned improvements include:
+### V2.1 — Evaluation & Application Refinement
 
-- Expand the corpus with **publicly redistributable** research material and create a larger, labelled evaluation set.
-- Compare RAG and Agent mode on retrieval quality, grounded answer correctness, abstention, latency and cost.
-- Add structured output validation, robust API error handling, retries and human-review paths.
-- Add automated tests, containerisation, and appropriate monitoring before exploring a controlled deployment.
+Finalise manual answer-correctness scoring and citation-groundedness checks. Repeat benchmarks across multiple runs to measure variability, and improve the Streamlit interface with configurable retrieval depth and document selection.
 
-### Future improvements
+Improve reproducibility through documented evaluation setup, regression tests and consistent experiment logging.
 
-- Evaluate retrieval reranking and hybrid keyword/vector search.
-- Introduce groundedness and citation-faithfulness checks.
-- Add bounded iterative agent workflows for complex, multi-step financial research.
-- Expand and repeat benchmarks to measure robustness and variability.
+### V3 — Advanced Retrieval & Reranking
+
+Implement a two-stage retrieval pipeline that retrieves a larger candidate set from ChromaDB and reranks passages according to their relevance to the question.
+
+Evaluate whether reranking improves Hit@3, Precision@3 and answer quality while controlling generation context size, latency and token consumption.
+
+Explore hybrid retrieval combining semantic vector search with lexical or keyword matching, particularly for financial terminology and numerical disclosures.
+
+### V4 — Bounded Iterative Agents
+
+Extend the existing single-step tool-calling workflow into an iterative research agent capable of evaluating retrieved evidence and performing additional searches when necessary.
+
+Introduce explicit stopping criteria, a maximum number of tool calls, structured tool-execution logs and evidence validation.
+
+Benchmark iterative agents against standard RAG on complex questions requiring multiple pieces of evidence.
+
+### V5 — Production Engineering & Deployment
+
+Improve system reliability through automated testing, API error handling, retries, logging and monitoring.
+
+Containerise the application using Docker and explore deployment and CI/CD workflows using GitHub Actions.
+
+Introduce stronger data validation, access controls and safeguards before considering use with sensitive or confidential documents.
 
 
 ## Notes
