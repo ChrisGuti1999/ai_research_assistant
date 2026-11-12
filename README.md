@@ -27,7 +27,7 @@ A Python-based research assistant that answers natural-language questions over f
 ## What it does
 
 - **Indexes documents:** Extracts text from `.pdf` and `.txt` files, splits it into overlapping chunks, generates embeddings, and stores the text, vectors, and source metadata in a persistent local ChromaDB collection.
-- **Answers with RAG:** Embeds the user's question, retrieves the configurable retrieval depth (top_k = 3 or 5) matching chunks with optional source filtering, and supplies them as context to an LLM. The assistant is instructed to answer from the evidence and cite its sources.
+- **Answers with RAG:** Retrieves the top three or five semantically similar chunks, optionally filtered to a selected source document, and supplies them as supporting evidence to the LLM. The assistant is instructed to answer from the evidence and cite its sources.
 - **Supports a bounded agent mode:** An LLM formulates a query using OpenAI function calling; Python runs the `search_reports` tool and passes its results back to the LLM for a final response.
 - **Evaluates retrieval and response performance:** Reports response latency, generative-model token usage, and retrieved passages; an evaluation script measures page-level and chunk-level Hit@K, Precision@K, MRR, abstention behaviour, latency and generative token usage.
 
@@ -150,6 +150,12 @@ python evaluate.py --mode agent --top-k 5
 Each configuration generates a separate CSV containing retrieved evidence, ranking metrics, abstention behaviour, latency and token consumption.
 
 
+For detailed setup instructions, source-document requirements
+and metric definitions, see the
+[V2 Evaluation Setup](docs/evaluation_setup.md).
+
+
+
 ## Tech stack
 
 | Component | Technology |
@@ -230,11 +236,6 @@ requirements.txt       Python dependencies
 
 The project follows an iterative development approach, progressing from a functional RAG prototype to evaluated retrieval systems, agentic workflows and production engineering practices.
 
-### V2.1 — Evaluation & Application Refinement
-
-Finalise manual answer-correctness scoring and citation-groundedness checks. Repeat benchmarks across multiple runs to measure variability, and improve the Streamlit interface with configurable retrieval depth and document selection.
-
-Improve reproducibility through documented evaluation setup, regression tests and consistent experiment logging.
 
 ### V3 — Advanced Retrieval & Reranking
 

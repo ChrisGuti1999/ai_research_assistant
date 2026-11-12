@@ -268,17 +268,17 @@ def main():
             ("chunk_hit_at_k", f"Chunk Hit@{args.top_k}", True),
             ("precision_at_3", "Mean Precision@3", True),
             ("precision_at_k", f"Mean Precision@{args.top_k}", True),
-            ("reciprocal_rank_at_3", "MRR@3", True),
-            ("reciprocal_rank_at_k", f"MRR@{args.top_k}", True),
+            ("reciprocal_rank_at_3", "MRR@3", False),
+            ("reciprocal_rank_at_k", f"MRR@{args.top_k}", False),
         ]
            
-    for field,label, as_percent in summary_metrics:
-        score = mean(row[field] for row in ranking_rows)
+        for field,label, as_percent in summary_metrics:
+            score = mean(row[field] for row in ranking_rows)
 
-        if as_percent:
-            print(f"{label}: {score:.1%}")
-        else:
-            print(f"{label}: {score:.3f}")
+            if as_percent:
+                print(f"{label}: {score:.1%}")
+            else:
+                print(f"{label}: {score:.3f}")
 
     correct_abstentions = sum(row["abstention_correct"] for row in rows)
 
