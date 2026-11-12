@@ -206,8 +206,7 @@ def main():
         )
 
     # 6. Export the evaluation results
-    output = ROOT / (f"evaluation_results_{args.mode}_k{args.top_k}.csv"
-)
+    output = ROOT / (f"evaluation_results_{args.mode}_k{args.top_k}.csv")
 
     with output.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))
@@ -224,6 +223,15 @@ def main():
         hits = sum(row["page_hit_at_3"] for row in scorable)
         print(f"\nPage Hit@3: {hits}/{len(scorable)}")
 
+    scorable_k = [
+        row for row in rows
+        if isinstance(row["page_hit_at_k"], bool)
+    ]
+
+    if scorable_k:
+        hits = sum(row["page_hit_at_k"] for row in scorable_k)
+        print(f"Page Hit@k: {hits}/{len(scorable_k)}")
+
 
     chunk_scorable = [
         row for row in rows
@@ -233,6 +241,17 @@ def main():
     if chunk_scorable:
         hits = sum(row["chunk_hit_at_3"] for row in chunk_scorable)
         print(f"Chunk Hit@3: {hits}/{len(chunk_scorable)}")
+
+    chunk_scorable_k = [
+        row for row in rows
+        if isinstance(row["chunk_hit_at_k"], bool)
+    ]
+
+    if chunk_scorable_k:
+        hits = sum(row["chunk_hit_at_k"] for row in chunk_scorable_k)
+        print(f"Chunk Hit@k: {hits}/{len(chunk_scorable_k)}")
+
+
 
 
 
@@ -261,30 +280,9 @@ def main():
         else:
             print(f"{label}: {score:.3f}")
 
+    correct_abstentions = sum(row["abstention_correct"] for row in rows)
 
 
-    if ranking_rows:
-        hit_at_1 = mean(
-            row["hit_at_1"] for row in ranking_rows
-        )
-
-        precision_at_3 = mean(
-            row["precision_at_3"] for row in ranking_rows
-        )
-
-        mrr_at_3 = mean(
-            row["reciprocal_rank"] for row in ranking_rows
-        )
-
-        print(f"Hit@1: {hit_at_1:.1%}")
-        print(f"Mean Precision@3: {precision_at_3:.1%}")
-        print(f"MRR@3: {mrr_at_3:.3f}")
-
-
-
-    correct_abstentions = sum(
-        row["abstention_correct"] for row in rows
-    )
     print(f"Abstention behaviour: {correct_abstentions}/{len(rows)}")
     print(f"Saved: {output.name}")
     print("Review answer correctness manually in the CSV.")

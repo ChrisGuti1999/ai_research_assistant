@@ -79,14 +79,30 @@ Created a ground-truth dataset of 15 financial research questions:
 
 Relevant document chunks were manually labelled using their source, page and chunk IDs.
 
-Evaluated four configurations using identical questions, the same document index, source filtering and embedding model:
+Evaluated four configurations using identical questions, the same document index, source filtering and embedding model.
+
+### Benchmark results — November 2026
+
+The following results were obtained from the latest single-run comparison of four source-filtered configurations, using the same 15-question evaluation dataset.
 
 | Metric | RAG k=3 | RAG k=5 | Agent k=3 | Agent k=5 |
 |---|---:|---:|---:|---:|
-| Evidence Hit@3 | 12/13 | 12/13 | 10/13 | 11/13 |
-| Evidence Hit@K | 12/13 | 13/13 | 10/13 | 13/13 |
-| Mean latency | 1.95s | 2.05s | 3.79s | 3.74s |
-| Mean generative LLM tokens | 1,068 | 1,646 | 1,349 | 1,951 |
+| Hit@1 | 10/13 | 10/13 | 8/13 | 8/13 |
+| Chunk Hit@3 | 12/13 | 12/13 | 11/13 | 11/13 |
+| Chunk Hit@K | 12/13 | 13/13 | 11/13 | 13/13 |
+| Mean Precision@3 | 48.7% | 48.7% | 38.5% | 41.0% |
+| Mean Precision@K | 48.7% | 33.8% | 38.5% | 33.8% |
+| MRR@3 | 0.833 | 0.821 | 0.731 | 0.718 |
+| MRR@K | 0.833 | 0.840 | 0.731 | 0.753 |
+| Correct answer/abstain decision | 14/15 | 15/15 | 13/15 | 15/15 |
+| Mean latency | 2.19s | 2.19s | 4.01s | 4.20s |
+| Mean generative LLM tokens | 1,072 | 1,642 | 1,358 | 1,980 |
+
+**Findings:** Both k=5 configurations achieved 100% labelled evidence retrieval across the 13 answerable questions. Standard RAG with k=5 achieved this with approximately 48% lower mean latency and 17% fewer generative LLM tokens than Agent k=5.
+
+**Interpretation:** Standard RAG with k=5 remains the preferred configuration for this dataset. Agent-generated query formulation did not demonstrate sufficient improvement in retrieval accuracy to justify its additional overhead.
+
+**Limitations:** These results represent individual runs, not statistically validated performance differences. Correct answer/abstain decisions do not establish factual answer correctness. Manual answer review, citation verification and repeated benchmarks remain necessary. Generative token counts exclude embeddings and are not equivalent to total API cost.
 
 ### Key findings
 
@@ -193,32 +209,8 @@ Open `http://localhost:8501`, click **Index documents**, choose **RAG** or **Age
 - What was Harbor Payments' processed payment volume in 2026?
 - Who was Aurelia Analytics' chief executive in June 2026? *(The documents do not supply this information; the assistant should abstain.)*
 
-## RAG versus agent: initial observations
 
-The first local test of the same question in each mode produced the following results:
 
-| Metric | RAG | Agent |
-| --- | ---: | ---: |
-| Latency | 4.37 s | 5.01 s |
-| LLM input tokens | 538 | 727 |
-| LLM output tokens | 61 | 159 |
-| Retrieved chunks | 3 | 3 |
-
-These are **single-run observations, not a benchmark**. Token counts cover generative LLM requests and **exclude embedding requests**; token counts are not equivalent to total monetary cost. Since the index contained only three chunks and retrieval requested the top three, both modes necessarily retrieved the entire corpus. No retrieval-quality advantage can be inferred from this comparison.
-
-## Evaluation
-
-Run the included evaluation script **after indexing the documents**:
-
-```bash
-python evaluate.py
-```
-
-It reads `eval_cases.json`, executes the basic RAG workflow, and saves `evaluation_results.csv`. The initial sample run returned **3/3 source-level Hit@3** on applicable questions and **1/1 expected abstention detected**.
-
-**Important limitations:** With only three indexed chunks and `top_k=3`, the retrieval result is not a meaningful test of ranking quality. The abstention check looks for particular phrases rather than verifying semantic correctness. The script does **not** yet assess answer faithfulness, citation accuracy, repeated-run variability, or agent-mode performance. Answers require manual review.
-
-A small chunking test is available at `tests/test_chunking.py`; to run it, install `pytest` in your environment and execute `python -m pytest`.
 
 ## Repository structure
 
