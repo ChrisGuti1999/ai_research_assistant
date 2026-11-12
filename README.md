@@ -16,10 +16,10 @@ A Python-based research assistant that answers natural-language questions over f
   </tr>
   <tr>
     <td width="50%">
-      <img src="images/rag_demo.png" alt="RAG Mode" width="100%">
+      <img src="images/rag_demo_v2.png" alt="RAG Mode" width="100%">
     </td>
     <td width="50%">
-      <img src="images/agent_demo.png" alt="Agent Mode" width="100%">
+      <img src="images/agent_demo_v2.png" alt="Agent Mode" width="100%">
     </td>
   </tr>
 </table>
