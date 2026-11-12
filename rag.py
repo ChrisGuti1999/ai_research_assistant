@@ -97,7 +97,8 @@ def ingest() -> dict:
     return {'documents': len(set(c['source'] for c in chunks)), 'chunks': len(chunks)}
 
 
-def search_reports(question: str, top_k: int = 3) -> list[dict]:
+def search_reports(question: str, top_k: int = 3, source_filter: str | None = None, ) -> list[dict]:
+    
     collection = get_collection()
     if collection.count() == 0:
         raise ValueError('Document index is empty. Click Index documents first.')
@@ -106,7 +107,8 @@ def search_reports(question: str, top_k: int = 3) -> list[dict]:
     ).data[0].embedding
     results = collection.query(
         query_embeddings=[q_embed], n_results=min(top_k, collection.count()),
-        include=['documents', 'metadatas', 'distances']
+        include=['documents', 'metadatas', 'distances'],
+        where=({"source": source_filter} if source_filter is not None else None),
     )
     return [{
         'chunk_id': chunk_id,
@@ -118,10 +120,9 @@ def search_reports(question: str, top_k: int = 3) -> list[dict]:
         results["ids"][0], results['documents'][0], results['metadatas'][0], results['distances'][0]
     )]
 
-
-def answer_question(question: str, top_k: int = 3) -> dict:
+def answer_question(question: str, top_k: int = 3, source_filter: str | None = None) -> dict:
     start = perf_counter()
-    evidence = search_reports(question, top_k=top_k)
+    evidence = search_reports(question, top_k=top_k, source_filter=source_filter,)
     numbered = '\n\n'.join(
         f'[{i}] Source: {e["source"]}, page {e["page"]}\n{e["text"]}'
         for i, e in enumerate(evidence, start=1)

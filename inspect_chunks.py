@@ -5,7 +5,7 @@ collection = get_collection()
 
 # Inspect all chunks stored for page xxx
 results = collection.get(
-    where={"page": 5},
+    where={"page": 24},
     include=["documents", "metadatas"]
 )
 

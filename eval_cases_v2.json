@@ -13,7 +13,7 @@
 
 {
   "id": "Q2",
-  "question": "What was its loss before tax in 2023?",
+  "question": "What was Plastic Energy's loss before tax in 2023?",
   "expected_answer": "£26.765m loss",
   "expected_pages": [4, 13, 25],
   "relevant_chunk_ids": [
@@ -26,7 +26,7 @@
 
 {
   "id": "Q3",
-  "question": "Why did the company operate at a loss in 2023?",
+  "question": "Why did Plastic Energy operate at a loss in 2023?",
   "expected_answer": "Heavy investment in technology development and organisational capabilities",
   "expected_pages": [4],
   "relevant_chunk_ids": [
@@ -37,7 +37,7 @@
 
 {
   "id": "Q4",
-  "question": "How did its cash balance change between 2022 and 2023?",
+  "question": "How did Plastic Energy's cash balance change between 2022 and 2023?",
   "expected_answer": "Increased from £0.919m to £3.288m, a rise of £2.369m",
   "expected_pages": [4, 14],
   "relevant_chunk_ids": [
@@ -55,5 +55,122 @@
   "relevant_chunk_ids": [
   ],
   "should_abstain": true
+},
+
+{
+  "id": "Q6",
+  "question": "What was Plastic Energy's gross profit in 2023?",
+  "expected_answer": "£3.659m",
+  "expected_pages": [13,4],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p13:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p4:c0"
+  ],
+  "should_abstain": false
+},
+
+{
+  "id": "Q7",
+  "question": "What were Plastic Energy's administrative expenses in 2023?",
+  "expected_answer": "£31.249m",
+  "expected_pages": [13, 23],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p13:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p23:c0"
+  ],
+  "should_abstain": false
+},
+
+{
+  "id": "Q8",
+  "question": "What was Plastic Energy's loss for the financial year in 2023, after tax?",
+  "expected_answer": "£25.799m",
+  "expected_pages": [13],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p13:c0"
+  ],
+  "should_abstain": false
+},
+
+{
+  "id": "Q9",
+  "question": "By approximately what percentage did Plastic Energy's revenue increase between 2022 and 2023?",
+  "expected_answer": "69.0%",
+  "expected_pages": [13,4],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p13:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p4:c0"
+  ],
+  "should_abstain": false
+},
+
+{
+  "id": "Q10",
+  "question": "What was Plastic Energy's loss before tax in 2022?",
+  "expected_answer": "£24.624m",
+  "expected_pages": [13, 4],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p13:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p4:c0"
+  ],
+  "should_abstain": false
+},
+
+
+{
+  "id": "Q11",
+  "question": "What were Plastic Energy's total assets at the end of 2023?",
+  "expected_answer": "£15.725m",
+  "expected_pages": [14],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p14:c0"
+  ],
+  "should_abstain": false
+},
+
+{
+  "id": "Q12",
+  "question": "What were Plastic Energy's net assets or liabilities at the end of 2023?",
+  "expected_answer": "Total net assets is £374,000 and total liabilities is £15.351m",
+  "expected_pages": [14],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p14:c0"
+  ],
+  "should_abstain": false
+},
+
+{
+  "id": "Q13",
+  "question": "What was Plastic Energy's carrying value of intangible assets at year-end 2023?",
+  "expected_answer": "£4.125m",
+  "expected_pages": [14,25],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p14:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p25:c0",
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p25:c1"
+  ],
+  "should_abstain": false
+},
+
+{
+  "id": "Q14",
+  "question": "What was the average number of employees employed by Plastic Energy Limited during the year ended 31 December 2023?",
+  "expected_answer": "92",
+  "expected_pages": [24],
+  "relevant_chunk_ids": [
+    "13.3.2.1_Plastic Energy Limited signed audited FS FY2023.pdf:p24:c0"
+  ],
+  "should_abstain": false
+},
+
+{
+  "id": "Q15",
+  "question": "What was Plastic Energy's net profit in 2025?",
+  "expected_answer": null,
+  "expected_pages": [],
+  "relevant_chunk_ids": [
+  ],
+  "should_abstain": true
 }
+
 ]
