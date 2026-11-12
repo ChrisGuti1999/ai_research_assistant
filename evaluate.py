@@ -6,6 +6,9 @@ import json
 from statistics import mean
 from rag import ROOT, answer_question
 
+import argparse
+from agent import agent_answer
+
 
 def detect_abstention(answer: str) -> bool:
     """Basic heuristic: detect when the model declines to answer."""
@@ -62,6 +65,25 @@ def calculate_ranking_metrics(sources, relevant_chunk_ids, k=3):
 
 
 def main():
+
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--mode",
+        choices=["rag", "agent"],
+        default="rag"
+    )
+
+    parser.add_argument(
+        "--top-k",
+        type=int,
+        choices=[3, 5],
+        default=3,
+    )
+
+    args = parser.parse_args()
+
     # 1. Load the verified ground-truth questions
     cases = json.loads(
         (ROOT / "eval_cases_v2.json").read_text(encoding="utf-8")
@@ -73,12 +95,24 @@ def main():
         # 2. Run the RAG application
         #result = answer_question(case["question"])
 
-        result = answer_question(case["question"], source_filter=(
-                "13.3.2.1_Plastic Energy Limited "
-                "signed audited FS FY2023.pdf"
-            ),
+        source = ("13.3.2.1_Plastic Energy Limited "
+            "signed audited FS FY2023.pdf"
         )
 
+        if args.mode == "rag":
+            result = answer_question(
+                case["question"],
+                top_k=args.top_k,
+                source_filter=source
+            )
+        else:
+            result = agent_answer(
+                case["question"],
+                top_k=args.top_k,
+                source_filter=source
+            )
+
+                
 
         retrieved_chunks_ranked = [
         {
@@ -131,6 +165,8 @@ def main():
         # 5. Store results for review
         row = {
             "id": case["id"],
+            "mode": args.mode,
+            "agent_search_query": result.get("search_query", ""),
             "question": case["question"],
             "expected_answer": case["expected_answer"] or "",
             "actual_answer": result["answer"],
@@ -163,7 +199,8 @@ def main():
         )
 
     # 6. Export the evaluation results
-    output = ROOT / "evaluation_results_v2.csv"
+    output = ROOT / (f"evaluation_results_{args.mode}_k{args.top_k}.csv"
+)
 
     with output.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))
