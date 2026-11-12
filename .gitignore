@@ -3,6 +3,12 @@
 .env.*
 !.env.example
 
+# Real financial reports used for local RAG evaluation
+documents/*.pdf
+
+# Generated evaluation outputs
+evaluation_results*.csv
+
 # Local development settings
 .vscode/
 
