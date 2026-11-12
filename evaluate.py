@@ -24,46 +24,52 @@ def detect_abstention(answer: str) -> bool:
 
 
 def calculate_ranking_metrics(sources, relevant_chunk_ids, k=3):
-    """Evaluate the ranking of retrieved chunks."""
+    """Calculate fixed @3 and configurable @K retrieval metrics."""
+
+
+    metrics = (
+        "hit_at_1",
+        "chunk_hit_at_3",
+        "chunk_hit_at_k",
+        "precision_at_3",
+        "precision_at_k",
+        "reciprocal_rank_at_3",
+        "reciprocal_rank_at_k",
+    )
 
     if not relevant_chunk_ids:
-        return {
-            "hit_at_1": None,
-            "precision_at_3": None,
-            "reciprocal_rank": None,
-        }
+        return {metric: None for metric in metrics}
+
 
     # Preserve retrieval order
     ranked_ids = [
         source["chunk_id"] for source in sources[:k]
     ]
 
-    # Identify the ranks containing relevant evidence
-    relevant_ranks = [
-        rank
-        for rank, chunk_id in enumerate(ranked_ids, start=1)
-        if chunk_id in relevant_chunk_ids
-    ]
+    def relevant_count(n):
+        return sum(
+            chunk_id in relevant_chunk_ids for chunk_id in ranked_ids[:n]
+        )
 
-    hit_at_1 = bool(ranked_ids) and ranked_ids[0] in relevant_chunk_ids
-
-    precision_at_3 = (
-        len(relevant_ranks) / k
-    )
-
-    reciprocal_rank = (
-        1 / relevant_ranks[0]
-        if relevant_ranks else 0.0
-    )
+    def reciprocal_rank(n):
+        return next(
+            (
+                1 / rank
+             for rank, chunk_id in enumerate(ranked_ids[:n], start=1)
+                                             if chunk_id in relevant_chunk_ids
+                                             ),
+                                             0.0)
 
     return {
-        "hit_at_1": hit_at_1,
-        "precision_at_3": round(precision_at_3, 3),
-        "reciprocal_rank": round(reciprocal_rank, 3),
+        "hit_at_1": relevant_count(1) > 0,
+        "chunk_hit_at_3": relevant_count(3) > 0,
+        "chunk_hit_at_k": relevant_count(k) > 0,
+        "precision_at_3": relevant_count(3) / 3,
+        "precision_at_k": relevant_count(k) / k,
+        "reciprocal_rank_at_3": reciprocal_rank(3),
+        "reciprocal_rank_at_k": reciprocal_rank(k),
     }
-
-
-
+                                            
 def main():
 
 
@@ -110,9 +116,7 @@ def main():
                 case["question"],
                 top_k=args.top_k,
                 source_filter=source
-            )
-
-                
+            ) 
 
         retrieved_chunks_ranked = [
         {
@@ -127,32 +131,34 @@ def main():
         # Compare retrieved chunks against ground-truth chunks
         expected_chunks = set(case.get("relevant_chunk_ids", []))
 
+
+        if not case["should_abstain"] and not expected_chunks:
+            raise ValueError(
+                f"{case['id']} has no labelled relevant chunks"
+            )
+
         ranking = calculate_ranking_metrics(
             result["sources"],
             expected_chunks,
-            k=3
+            k=args.top_k
         )
-
-        retrieved_chunks = {
-            source["chunk_id"]
-            for source in result["sources"]
-        }
-
-        chunk_hit_at_3 = (
-            bool(expected_chunks & retrieved_chunks)
-            if expected_chunks else None
-        )
-
-
 
         # 3. Compare retrieved pages with expected pages
         expected_pages = set(case["expected_pages"])
-        retrieved_pages = {
-            int(source["page"]) for source in result["sources"]
-        }
 
-        page_hit = (
-            bool(expected_pages & retrieved_pages)
+        ranked_pages = [
+            int(source["page"]) for source in result["sources"]
+        ]
+
+        retrieved_pages = set(ranked_pages)
+
+        page_hit_at_3 = (
+            bool(expected_pages & set(ranked_pages[:3]))
+            if expected_pages else None
+        )
+
+        page_hit_at_k = (
+            bool(expected_pages & set(ranked_pages[:args.top_k]))
             if expected_pages else None
         )
 
@@ -173,8 +179,9 @@ def main():
             "expected_pages": sorted(expected_pages),
             "retrieved_pages": sorted(retrieved_pages),
             "retrieved_chunks_ranked": json.dumps(retrieved_chunks_ranked),
-            "chunk_hit_at_3": (chunk_hit_at_3 if chunk_hit_at_3 is not None else ""),
-            "page_hit_at_3": page_hit if page_hit is not None else "",
+            "top_k": args.top_k,
+            "page_hit_at_3": page_hit_at_3 if page_hit_at_3 is not None else "",
+            "page_hit_at_k": page_hit_at_k if page_hit_at_k is not None else "",
             "should_abstain": case["should_abstain"],
             "abstained": abstained,
             "abstention_correct": abstention_correct,
@@ -232,8 +239,29 @@ def main():
     # Calculate ranking metrics across answerable questions
     ranking_rows = [
         row for row in rows
-        if isinstance(row["precision_at_3"], float)
+        if isinstance(row["hit_at_1"], bool)
     ]
+
+    if ranking_rows:
+        summary_metrics = [
+            ("hit_at_1", "Hit@1", True),
+            ("chunk_hit_at_3", "Chunk Hit@3", True),
+            ("chunk_hit_at_k", f"Chunk Hit@{args.top_k}", True),
+            ("precision_at_3", "Mean Precision@3", True),
+            ("precision_at_k", f"Mean Precision@{args.top_k}", True),
+            ("reciprocal_rank_at_3", "MRR@3", True),
+            ("reciprocal_rank_at_k", f"MRR@{args.top_k}", True),
+        ]
+           
+    for field,label, as_percent in summary_metrics:
+        score = mean(row[field] for row in ranking_rows)
+
+        if as_percent:
+            print(f"{label}: {score:.1%}")
+        else:
+            print(f"{label}: {score:.3f}")
+
+
 
     if ranking_rows:
         hit_at_1 = mean(

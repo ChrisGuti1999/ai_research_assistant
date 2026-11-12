@@ -62,6 +62,80 @@ A Python-based research assistant that answers natural-language questions over f
 
 Both modes use the **same indexed documents and retrieval function**. The key difference is that basic RAG searches with the original question, whereas agent mode uses a query selected by the LLM through a structured tool call. In this prototype, the agent is **required to call one available search tool**; it is not an autonomous multi-tool system.
 
+## V2 — Financial Statement Evaluation & Benchmarking
+
+### Objective
+
+Evaluate the accuracy, retrieval quality and efficiency of a financial research assistant built with OpenAI embeddings, ChromaDB and the Responses API.
+
+V2 introduces a structured evaluation framework to benchmark RAG against an LLM tool-calling agent using 15 ground-truth questions from Plastic Energy Limited's FY2023 financial statements. The evaluation investigates retrieval quality, source filtering, response latency and token efficiency, with the aim of selecting the simplest architecture that reliably retrieves supporting evidence.
+
+### Evaluation methodology
+
+Created a ground-truth dataset of 15 financial research questions:
+
+- 13 answerable questions covering financial figures, calculations and company disclosures.
+- 2 unanswerable questions designed to test abstention behaviour.
+
+Relevant document chunks were manually labelled using their source, page and chunk IDs.
+
+Evaluated four configurations using identical questions, the same document index, source filtering and embedding model:
+
+| Metric | RAG k=3 | RAG k=5 | Agent k=3 | Agent k=5 |
+|---|---:|---:|---:|---:|
+| Evidence Hit@3 | 12/13 | 12/13 | 10/13 | 11/13 |
+| Evidence Hit@K | 12/13 | 13/13 | 10/13 | 13/13 |
+| Mean latency | 1.95s | 2.05s | 3.79s | 3.74s |
+| Mean generative LLM tokens | 1,068 | 1,646 | 1,349 | 1,951 |
+
+### Key findings
+
+**1. Source filtering substantially improved retrieval quality.**
+
+Initial searches across multiple indexed companies produced irrelevant financial evidence. Restricting retrieval to the target document increased labelled Chunk Hit@3 from 46.2% to 92.3%.
+
+**2. Retrieval depth was more beneficial than agent-based query reformulation.**
+
+One employee-count question failed because the correct evidence ranked outside the top three chunks. Increasing retrieval depth to five recovered the relevant passage and enabled the correct answer of 92 employees.
+
+**3. Standard RAG with k=5 was the preferred configuration.**
+
+Both RAG and Agent mode achieved 13/13 labelled evidence hits at k=5. Standard RAG had lower average latency and lower generative LLM token consumption.
+
+The additional LLM tool-calling step did not demonstrate sufficient benefit to justify its overhead on this dataset.
+
+### Limitations
+
+The benchmark contains only 15 questions and one run per configuration. Retrieval labels are manually curated, and factual answer correctness and citation faithfulness have not yet been fully scored.
+
+Agent and RAG modes also use different answer-generation instructions, so this is a workflow comparison rather than an isolated test of query rewriting.
+
+Token counts exclude embedding API usage. Results are not intended as production performance guarantees.
+
+The Plastic Energy PDF is indexed locally and is not currently bundled with the repository. Reproducing the experiment requires the same source document, chunking configuration and ground-truth labels.
+
+### Running the benchmark
+
+Activate the project's virtual environment, index the evaluation document and run:
+
+```
+python evaluate.py --mode rag --top-k 3
+python evaluate.py --mode rag --top-k 5
+python evaluate.py --mode agent --top-k 3
+python evaluate.py --mode agent --top-k 5
+```
+
+Each configuration generates a separate CSV containing retrieved evidence, ranking metrics, abstention behaviour, latency and token consumption.
+
+### Future improvements
+
+- Evaluate retrieval reranking and hybrid keyword/vector search.
+- Introduce groundedness and citation-faithfulness checks.
+- Add bounded iterative agent workflows for complex, multi-step financial research.
+- Expand and repeat benchmarks to measure robustness and variability.
+
+
+
 ## Tech stack
 
 | Component | Technology |
