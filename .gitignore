@@ -9,6 +9,8 @@ documents/*.pdf
 # Generated evaluation outputs
 evaluation_results*.csv
 
+reranking_comparison_v3.csv
+
 # Local development settings
 .vscode/
 

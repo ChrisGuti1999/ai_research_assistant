@@ -120,9 +120,37 @@ def search_reports(question: str, top_k: int = 3, source_filter: str | None = No
         results["ids"][0], results['documents'][0], results['metadatas'][0], results['distances'][0]
     )]
 
-def answer_question(question: str, top_k: int = 3, source_filter: str | None = None) -> dict:
+
+def answer_question(question: str, top_k: int = 3, source_filter: str | None = None, rerank: bool = False, candidate_k: int = 10,) -> dict:
+
     start = perf_counter()
-    evidence = search_reports(question, top_k=top_k, source_filter=source_filter,)
+
+    if rerank:
+        # First-stage retrieval: obtain 10 candidate passages.
+        candidates = search_reports(
+            question,
+            top_k=candidate_k,
+            source_filter=source_filter,
+        )
+
+        # Second-stage retrieval: rerank and keep the best 3.
+        from reranker import rerank_chunks
+
+        evidence = rerank_chunks(
+            question,
+            candidates,
+            top_k=top_k,
+        )
+
+    else:
+        # Original V2 behaviour.
+        evidence = search_reports(
+            question,
+            top_k=top_k,
+            source_filter=source_filter,
+        )
+
+
     numbered = '\n\n'.join(
         f'[{i}] Source: {e["source"]}, page {e["page"]}\n{e["text"]}'
         for i, e in enumerate(evidence, start=1)

@@ -88,7 +88,21 @@ def main():
         default=3,
     )
 
+    parser.add_argument(
+        "--rerank",
+        action="store_true",
+        help="Enable cross-encoder reranking for RAG",
+    )
+
     args = parser.parse_args()
+
+    if args.rerank:
+        if args.mode != "rag":
+            parser.error("--rerank requires --mode rag")
+
+        # Load before starting the evaluation loop.
+        from reranker import get_reranker
+        get_reranker()
 
     # 1. Load the verified ground-truth questions
     cases = json.loads(
@@ -109,7 +123,8 @@ def main():
             result = answer_question(
                 case["question"],
                 top_k=args.top_k,
-                source_filter=source
+                source_filter=source,
+                rerank=args.rerank,
             )
         else:
             result = agent_answer(
@@ -117,6 +132,7 @@ def main():
                 top_k=args.top_k,
                 source_filter=source
             ) 
+
 
         retrieved_chunks_ranked = [
         {
@@ -206,7 +222,8 @@ def main():
         )
 
     # 6. Export the evaluation results
-    output = ROOT / (f"evaluation_results_{args.mode}_k{args.top_k}.csv")
+    suffix = "_reranked" if args.rerank else ""
+    output = ROOT / (f"evaluation_results_{args.mode}{suffix}_k{args.top_k}.csv")
 
     with output.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))
